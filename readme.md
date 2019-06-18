@@ -1,0 +1,1 @@
+a cli app to fetch an api using <a href='https://pypi.org/project/click/'>click</a>  and <a href='https://pypi.org/project/requests/'>requests</a>
