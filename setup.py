@@ -7,7 +7,7 @@ setup(
     install_requires=[
         'pytest-cov',
         'pytest',
-        'requests',
+        'requests[security]',
         'flake8',
         'Click'
     ],
