@@ -1,13 +1,6 @@
 import click
 import requests
-import pprint
-
-
-class FireWater:
-    """Defines the the methods that implement the...
-
-    ...functionality of FireWater App
-    """
+import json
 
 
 api_base_url = 'https://ah-django-staging.herokuapp.com/api'
@@ -38,28 +31,36 @@ def get_resource_url(params=[]):
 
 
 @cli.command()
-@click.option('--slug',
-              help='Pass in a slug for a specific article view')
-def view(slug=None):
-    """Retrieves articles.
-    For a specific article, pass in a slug
+@click.option("-s", "--save", is_flag=True, help="export to json file")
+def list(save=None):
+    """Retrieves an article
 
-    Optional arguments:
-        slug [string] -- [the slug of an article]
     """
-    if slug is None:
-        article_url = get_resource_url(['articles', 'feed'])
-    else:
-        article_url = get_resource_url(['articles', slug])
+    article_url = get_resource_url(['articles', 'feed'])
 
     article_resource = fetch_resource(article_url)
-    if article_resource.status_code == 200:
-        print({"Success": "{}".format(article_resource.status_code)})
-        pretty_resource = pprint.pformat(article_resource.json(), indent=2)
-        print(pretty_resource)
-    elif article_resource.status_code == 404:
-        print({"Not Found": "{}".format(article_resource.status_code)})
-        print(article_resource.json())
+
+    formart_output(article_resource.status_code, article_resource.json())
+
+    if save:
+        export_to_json(article_resource.json()['results'])
+
+
+@cli.command()
+@click.argument('slug')
+@click.option("-s", "--save", is_flag=True, help="export to json file")
+def view(slug, save=None):
+    article_url = get_resource_url(['articles', slug])
+    article_resource = fetch_resource(article_url)
+
+    formart_output(
+        article_resource.status_code,
+        article_resource.json())
+
+    if save:
+        export_to_json(
+            article_resource.json()['title'],
+            article_resource.json())
 
 
 def fetch_resource(resource_url):
@@ -71,3 +72,28 @@ def fetch_resource(resource_url):
 
     response = requests.get(resource_url)
     return response
+
+
+def formart_output(status_code, output):
+
+    if status_code == 200:
+        print({"Success": "{}".format(status_code)})
+        pretty_resource = json.dumps(output, indent=4)
+        print(pretty_resource)
+        return pretty_resource
+    elif status_code == 404:
+        print({"Not Found": "{}".format(status_code)})
+        print(output)
+        return output
+    else:
+        print({"Error occurred": "{}".format(status_code)})
+        print(output)
+        return output
+
+
+def export_to_json(data, file_name='articles'):
+    with open(
+            '{}.json'.format(file_name), 'w') as json_file:
+        exported_data = json.dump(data, json_file, indent=2)
+
+    return exported_data
