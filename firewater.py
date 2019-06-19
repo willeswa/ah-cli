@@ -3,13 +3,6 @@ import requests
 import json
 
 
-class FireWater:
-    """Defines the the methods that implement the...
-
-    ...functionality of FireWater App
-    """
-
-
 api_base_url = 'https://ah-django-staging.herokuapp.com/api'
 
 
